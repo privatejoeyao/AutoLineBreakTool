@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>自動換行工具</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 40px 0;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 80%;
+      max-width: 800px;
+      background-color: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      font-size: 14px;
+      padding: 10px;
+      margin-bottom: 15px;
+      resize: none;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .button {
+      background-color: #f0ad4e;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    .output {
+      width: 100%;
+      max-height: 400px;
+      overflow-y: auto;
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      white-space: pre-wrap;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .copy-button {
+      background-color: #5bc0de;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #copyAlert {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #5cb85c;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+    }
+    #copyAlert.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>自動換行工具</h2>
+    <textarea id="inputText" placeholder="將對話內容貼上在這裡..."></textarea>
+    <button class="button" onclick="generateOutput()">生成</button>
+    
+    <div class="output" id="outputText"></div>
+    <button class="copy-button" onclick="copyOutput()">複製</button>
+  </div>
+
+  <div id="copyAlert">✅ 複製成功！</div>
+
+  <script>
+    function generateOutput() {
+      const input = document.getElementById('inputText').value;
+      const lines = input.split('\n');
+      let output = '';
+      let lastUser = '';
+      lines.forEach((line) => {
+        const match = line.match(/\[.*?\]\s*(.*?):/);
+        if (match) {
+          const currentUser = match[1];
+          if (lastUser && currentUser !== lastUser) {
+            output += '\n'; // 空一行表示使用者轉換
+          }
+          lastUser = currentUser;
+        }
+        output += line + '\n';
+      });
+      document.getElementById('outputText').textContent = output;
+      document.getElementById('outputText').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyOutput() {
+      const outputText = document.getElementById('outputText');
+      const range = document.createRange();
+      range.selectNode(outputText);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+      document.execCommand('copy');
+      window.getSelection().removeAllRanges();
+      const alertBox = document.getElementById('copyAlert');
+      alertBox.classList.add('show');
+      setTimeout(() => {
+        alertBox.classList.remove('show');
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
