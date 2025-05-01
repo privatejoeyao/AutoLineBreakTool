@@ -55,6 +55,7 @@
       white-space: pre-wrap;
       font-size: 14px;
       margin-bottom: 10px;
+      cursor: pointer;
     }
     .copy-button {
       background-color: #5bc0de;
@@ -88,10 +89,10 @@
 <body>
   <div class="container">
     <h2>自動換行工具</h2>
-    <textarea id="inputText" placeholder="將對話內容貼上在這裡..."></textarea>
+    <textarea id="inputText" placeholder="將對話內容貼上在這裡..." onclick="this.select()"></textarea>
     <button class="button" onclick="generateOutput()">生成</button>
     
-    <div class="output" id="outputText"></div>
+    <div class="output" id="outputText" onclick="selectOutputText()"></div>
     <button class="copy-button" onclick="copyOutput()">複製</button>
   </div>
 
@@ -131,6 +132,15 @@
       setTimeout(() => {
         alertBox.classList.remove('show');
       }, 1000);
+    }
+
+    function selectOutputText() {
+      const output = document.getElementById('outputText');
+      const range = document.createRange();
+      range.selectNodeContents(output);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
     }
   </script>
 </body>
