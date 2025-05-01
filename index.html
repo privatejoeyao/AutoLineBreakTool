@@ -99,32 +99,37 @@
   <div id="copyAlert">✅ 複製成功！</div>
 
   <script>
+    function getRole(line) {
+      const match = line.match(/\[\d{2}:\d{2}:\d{2}\]\s*(.*?):/);
+      if (match) {
+        const name = match[1];
+        // 如果名稱包含英文和數字，視為 USER；如果是簡體中文，視為 AGENT
+        if (/^[A-Za-z0-9]+$/.test(name)) {
+          return 'USER';
+        } else {
+          return 'AGENT';
+        }
+      }
+      return 'USER'; // 無冒號或不規則格式，一律視為 USER
+    }
+
     function generateOutput() {
       const input = document.getElementById('inputText').value;
       const lines = input.split('\n');
       let output = '';
-      let lastSpeakerType = '';
+      let lastRole = '';
 
-      function getSpeakerType(name) {
-        // 英文+數字開頭視為 USER
-        if (/^[A-Za-z0-9]+$/.test(name)) return 'USER';
-        // 簡體中文視為 AGENT
-        if (/[\u4e00-\u9fff]/.test(name)) return 'AGENT';
-        // 其他皆視為 USER
-        return 'USER';
-      }
+      lines.forEach((line, index) => {
+        if (line.trim() === '') return;
 
-      lines.forEach((line) => {
-        const match = line.match(/\[.*?\]\s*(.*?):/);
-        const name = match ? match[1].trim() : null;
-        const currentType = getSpeakerType(name);
+        const currentRole = getRole(line);
 
-        if (lastSpeakerType && currentType !== lastSpeakerType) {
-          output += '\u200B\n'; // 半行空白
+        if (lastRole && currentRole !== lastRole) {
+          output += '\n'; // 插入整行空行
         }
 
-        lastSpeakerType = currentType;
         output += line + '\n';
+        lastRole = currentRole;
       });
 
       document.getElementById('outputText').textContent = output;
