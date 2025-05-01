@@ -103,23 +103,27 @@
       const input = document.getElementById('inputText').value;
       const lines = input.split('\n');
       let output = '';
-      let lastUserId = '';
+      let lastSpeakerType = '';
+
+      function getSpeakerType(name) {
+        // 英文+數字開頭視為 USER
+        if (/^[A-Za-z0-9]+$/.test(name)) return 'USER';
+        // 簡體中文視為 AGENT
+        if (/[\u4e00-\u9fff]/.test(name)) return 'AGENT';
+        // 其他皆視為 USER
+        return 'USER';
+      }
 
       lines.forEach((line) => {
-        const match = line.match(/\]\s*([^:]+)\s*:/); // 擷取時間之後到冒號之前的角色名稱
-        let currentUserId = '';
+        const match = line.match(/\[.*?\]\s*(.*?):/);
+        const name = match ? match[1].trim() : null;
+        const currentType = getSpeakerType(name);
 
-        if (match) {
-          currentUserId = match[1].trim();
-        } else {
-          currentUserId = 'UNKNOWN'; // 格式不符的行，視為 USER
+        if (lastSpeakerType && currentType !== lastSpeakerType) {
+          output += '\u200B\n'; // 半行空白
         }
 
-        if (lastUserId && currentUserId !== lastUserId) {
-          output += '\n'; // 若角色變更就空一行
-        }
-
-        lastUserId = currentUserId;
+        lastSpeakerType = currentType;
         output += line + '\n';
       });
 
